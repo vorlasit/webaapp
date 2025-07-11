@@ -1,0 +1,32 @@
+{% include 'style/style.html' %}
+
+<div class="container mt-4" style="max-width: 500px;">
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="groups_select" class="form-label">Groups</label>
+            <select class="form-select" id="groups_select" name="groups" multiple="multiple" style="width: 100%;">
+                {% for group in groups %}
+                <option value="{{ group.id }}" {% if group.id in selected_group_ids %}selected{% endif %}>
+                    {{ group.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>

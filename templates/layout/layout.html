@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Flask App{% endblock %}</title>
+ {% include "/style/style.html" %}
+
+
+  <script>
+    function previewImage(event, name) {
+      const file = event.target.files[0];
+      const preview = document.getElementById(`${name}Preview`);
+      const fallback = document.getElementById(`${name}Fallback`);
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          fallback.classList.add("d-none");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(name) {
+      const input = document.getElementById(`${name}Input`);
+      const preview = document.getElementById(`${name}Preview`);
+      const fallback = document.getElementById(`${name}Fallback`);
+      preview.src = "/static/uploads/default.jpg";  
+      preview.style.display = "block";
+      fallback.classList.remove("d-none");
+      input.value = "";
+    }
+     
+    window.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("img[id$='Preview']").forEach((img) => {
+        const name = img.id.replace("Preview", "");
+        const fallback = document.getElementById(`${name}Fallback`);
+        img.onerror = () => {
+          fallback.classList.remove("d-none");
+          img.style.display = "none";
+        };
+        img.onload = () => {
+          fallback.classList.add("d-none");
+          img.style.display = "block";
+        };
+      });
+    });
+
+    function enableEdit() { 
+      document.getElementById('username').removeAttribute('readonly');
+      document.getElementById('name').removeAttribute('readonly');
+      document.getElementById('email').removeAttribute('readonly'); 
+      document.getElementById('avatarEditBtn').classList.remove('d-none');
+      document.getElementById('avatarDeleteBtn').classList.remove('d-none'); 
+      document.getElementById('saveBtn').classList.remove('d-none');
+      document.getElementById('discardBtn').classList.remove('d-none'); 
+      document.getElementById('editBtn').classList.add('d-none');
+    }
+
+    function disableEdit() { 
+      document.getElementById('username').setAttribute('readonly', true);
+      document.getElementById('name').setAttribute('readonly', true);
+      document.getElementById('email').setAttribute('readonly', true); 
+      document.getElementById('avatarEditBtn').classList.add('d-none');
+      document.getElementById('avatarDeleteBtn').classList.add('d-none'); 
+      document.getElementById('saveBtn').classList.add('d-none');
+      document.getElementById('discardBtn').classList.add('d-none'); 
+      document.getElementById('editBtn').classList.remove('d-none'); 
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      usernameInput.value = usernameInput.dataset.originalValue;
+      emailInput.value = emailInput.dataset.originalValue; 
+      const avatarPreview = document.getElementById('avatarPreview');
+      avatarPreview.src = avatarPreview.dataset.originalSrc; 
+      document.getElementById('avatarInput').value = "";
+    }
+  </script>
+</head>
+
+<body>
+  {% if current_user.is_authenticated %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('auth.login') }}">MyApp</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item d-flex justify-content-center align-items-center">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item d-flex justify-content-center align-items-center">
+            <a class="nav-link" href="#">Features</a>
+          </li>
+          <li class="nav-item d-flex justify-content-center align-items-center">
+            <li><a class="dropdown-item" href="{{ url_for('auth.create_order') }}">Create Order</a></li>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <div class="d-flex justify-content-center align-items-center">
+                Setting
+              </div>
+            </a>
+
+            <ul class="dropdown-menu shadow">
+              <li><a class="dropdown-item" href="/">Companies</a></li>
+              <li><a class="dropdown-item" href="/">Groups</a></li>
+              <li><a class="dropdown-item" href="/">Users</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item d-flex align-items-center">
+            <a class="nav-link d-flex align-items-center" href="/"> {{ current_user.name|upper }}</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">   {% if current_user.avatar %}
+              <img src="{{ url_for('static', filename='uploads/' ~ current_user.avatar) }}" alt="Avatar"
+                class="rounded-circle me-2" width="32" height="32" />
+              {% else %}
+              <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center"
+                style="width: 32px; height: 32px">
+                {{ current_user.name[0]|upper }}
+              </div>
+              {% endif %}  
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><a class="dropdown-item" href="/">My Profile</a></li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Log out</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  {% endif %}
+  
+  <div class="container-fluid full-page-container">
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <div class="alert alert-info">
+      {% for message in messages %}
+      <div>{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %} {% block content %}{% endblock %}
+  </div>
+</body>
+
+</html>
